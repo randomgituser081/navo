@@ -4,7 +4,10 @@
 FROM node:24-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# npm on Windows can leave Linux-only optional deps out of the lockfile (npm bug);
+# fall back to a normal install rather than failing the deploy.
+RUN npm ci --no-audit --no-fund || \
+    (echo "WARNING: package-lock.json out of sync for Linux; using npm install" && npm install --no-audit --no-fund)
 
 FROM node:24-alpine AS builder
 WORKDIR /app
