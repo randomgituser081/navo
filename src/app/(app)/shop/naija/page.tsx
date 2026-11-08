@@ -19,7 +19,8 @@ export default function NaijaShopPage() {
         name: p.name,
         price: toNumber(p.price),
         currency: (p.currency ?? "NGN").toUpperCase(),
-        image: mediaUrl(p.image ?? p.images?.[0] ?? p.imageUrl),
+        // image is a list of /uploads/... paths in the API
+        image: mediaUrl(Array.isArray(p.image) ? p.image[0] : p.image ?? p.images?.[0] ?? p.imageUrl),
         subtitle: p.vendor?.name ?? p.vendorName,
         available: p.isAvailable !== false && Number(p.stock ?? 1) > 0,
       })}

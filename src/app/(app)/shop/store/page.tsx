@@ -18,7 +18,8 @@ export default function StorePage() {
         name: p.name,
         price: toNumber(p.price),
         currency: (p.currency ?? "NGN").toUpperCase(),
-        image: mediaUrl(p.image ?? p.images?.[0]),
+        // image is a list of /uploads/... paths in the API
+        image: mediaUrl(Array.isArray(p.image) ? p.image[0] : p.image ?? p.images?.[0]),
         available: !/out_of_stock/i.test(p.productStatus ?? ""),
       })}
       checkout={async (lines, address, total) => {
