@@ -1,6 +1,7 @@
 "use client";
 
 import { navo } from "@/lib/api";
+import { mediaUrl } from "@/lib/media";
 import { Catalog } from "@/components/catalog";
 import { toNumber } from "@/components/shop";
 
@@ -17,7 +18,7 @@ export default function StorePage() {
         name: p.name,
         price: toNumber(p.price),
         currency: (p.currency ?? "NGN").toUpperCase(),
-        image: p.image ?? p.images?.[0],
+        image: mediaUrl(p.image ?? p.images?.[0]),
         available: !/out_of_stock/i.test(p.productStatus ?? ""),
       })}
       checkout={async (lines, address, total) => {

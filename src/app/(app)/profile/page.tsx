@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { auth, navo } from "@/lib/api";
 import { useApi } from "@/lib/use-api";
+import { mediaUrl } from "@/lib/media";
 import { Badge, Button, Card, Field, Input, PageLoader, PasswordInput, Select } from "@/components/ui";
 import { useToast } from "@/components/toast";
 
@@ -21,6 +22,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [pw, setPw] = useState({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
   const [changing, setChanging] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -70,6 +72,27 @@ export default function ProfilePage() {
     }
   }
 
+  // Same rules as the API: JPG/PNG/WebP up to 10 MB (it also accepts PDFs, which make no sense here).
+  async function uploadPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) return toast("Choose a JPG, PNG or WebP image", "danger");
+    if (file.size > 10 * 1024 * 1024) return toast("The image must be under 10 MB", "danger");
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("avatar", file);
+      await navo.post("/upload-image/user", form);
+      toast("Profile photo updated", "success");
+      reload();
+    } catch (err) {
+      toast((err as Error).message, "danger");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function logout() {
     await auth("logout").catch(() => null);
     router.replace("/login");
@@ -83,13 +106,19 @@ export default function ProfilePage() {
       <h1 className="text-2xl sm:text-3xl font-black text-navy">Profile</h1>
 
       <Card className="p-6 flex flex-wrap items-center gap-5">
-        <div className="size-16 rounded-full bg-orange text-white flex items-center justify-center text-2xl font-black overflow-hidden">
-          {user?.profilePicture ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.profilePicture} alt="" className="size-full object-cover" />
-          ) : (
-            String(user?.accountName ?? "?").charAt(0)
-          )}
+        <div className="flex flex-col items-center gap-1.5">
+          <div className="size-16 rounded-full bg-orange text-white flex items-center justify-center text-2xl font-black overflow-hidden">
+            {user?.profilePicture ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={mediaUrl(user.profilePicture)} alt="" className="size-full object-cover" />
+            ) : (
+              String(user?.accountName ?? "?").charAt(0)
+            )}
+          </div>
+          <label className={`text-xs font-bold ${uploading ? "text-navy/40" : "text-orange cursor-pointer hover:underline"}`}>
+            {uploading ? "Uploading…" : "Change photo"}
+            <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={uploading} onChange={uploadPhoto} />
+          </label>
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-xl font-black text-navy">{user?.accountName}</p>

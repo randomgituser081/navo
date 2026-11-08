@@ -1,6 +1,7 @@
 "use client";
 
 import { navo } from "@/lib/api";
+import { mediaUrl } from "@/lib/media";
 import { Catalog } from "@/components/catalog";
 import { toNumber } from "@/components/shop";
 
@@ -18,7 +19,7 @@ export default function NaijaShopPage() {
         name: p.name,
         price: toNumber(p.price),
         currency: (p.currency ?? "NGN").toUpperCase(),
-        image: p.image ?? p.images?.[0] ?? p.imageUrl,
+        image: mediaUrl(p.image ?? p.images?.[0] ?? p.imageUrl),
         subtitle: p.vendor?.name ?? p.vendorName,
         available: p.isAvailable !== false && Number(p.stock ?? 1) > 0,
       })}
