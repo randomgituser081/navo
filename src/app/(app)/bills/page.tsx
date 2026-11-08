@@ -75,13 +75,14 @@ function AirtimeForm({ onReady }: { onReady: Ready }) {
     e.preventDefault();
     if (!NG_PHONE.test(form.phoneNumber)) return toast("Enter an 11-digit phone number, e.g. 08012345678", "danger");
     if (!Number(form.amount)) return toast("Enter an amount", "danger");
+    if (Number(form.amount) < 100) return toast("Airtime must be at least ₦100", "danger");
     onReady({ path: "/vtu/purchase-airtime", body: { ...form, amount: Number(form.amount) }, summary: `${money(form.amount, "NGN")} airtime to ${form.phoneNumber}` });
   }
   return (
     <form onSubmit={submit} className="space-y-4">
       <NetworkPicker value={form.networkProvider} onChange={(v) => setForm({ ...form, networkProvider: v })} />
       <Field label="Phone number"><Input inputMode="numeric" maxLength={11} value={form.phoneNumber} onChange={(e) => setForm({ ...form, phoneNumber: e.target.value.replace(/\D/g, "") })} placeholder="08012345678" /></Field>
-      <Field label="Amount (₦)"><Input type="number" min="50" inputMode="numeric" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></Field>
+      <Field label="Amount (₦)"><Input type="number" min="100" inputMode="numeric" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} /></Field>
       <Button type="submit" className="w-full">Buy airtime</Button>
     </form>
   );
@@ -165,6 +166,7 @@ function ElectricityForm({ onReady }: { onReady: Ready }) {
     if (!form.disco) return toast("Choose your electricity company", "danger");
     if (!form.customerId) return toast("Enter the meter number", "danger");
     if (!Number(form.amount)) return toast("Enter an amount", "danger");
+    if (Number(form.amount) < 500) return toast("Electricity must be at least ₦500", "danger");
     onReady({ path: "/vtu/purchase-electricity", body: { ...form, amount: Number(form.amount) }, summary: `${money(form.amount, "NGN")} electricity for ${customer.name || form.customerId}` });
   }
   return (
