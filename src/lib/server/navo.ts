@@ -68,7 +68,7 @@ export async function refreshAccessToken(): Promise<string | null> {
   if (!res.ok) return null;
   const data = await res.json().catch(() => null);
   if (!data?.accessToken) return null;
-  await setSession(data.accessToken);
+  await setSession(data.accessToken, data.refreshToken);
   return data.accessToken;
 }
 
